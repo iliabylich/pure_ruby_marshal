@@ -31,6 +31,7 @@ class PureRubyMarshal::ReadBuffer
     when 'c' then read_class
     when 'm' then read_module
     when 'S' then read_struct
+    when '/' then read_regexp
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -124,5 +125,11 @@ class PureRubyMarshal::ReadBuffer
     attributes = read_hash
     values = attributes.values_at(*klass.members)
     klass.new(*values)
+  end
+
+  def read_regexp
+    string = read_string
+    kcode = read_byte
+    Regexp.new(string, kcode)
   end
 end

@@ -19,4 +19,5 @@ FIXTURES = {
   'class' => Array,
   'module' => Marshal,
   'struct' => Point.new(3, 7),
+  'regexp' => /a_regexp/,
 }
