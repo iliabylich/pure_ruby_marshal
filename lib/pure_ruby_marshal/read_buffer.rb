@@ -32,6 +32,7 @@ class PureRubyMarshal::ReadBuffer
     when 'm' then read_module
     when 'S' then read_struct
     when '/' then read_regexp
+    when 'o' then read_object
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -131,5 +132,15 @@ class PureRubyMarshal::ReadBuffer
     string = read_string
     kcode = read_byte
     Regexp.new(string, kcode)
+  end
+
+  def read_object
+    klass = marshal_const_get(read)
+    ivars_data = read_hash
+    object = klass.allocate
+    ivars_data.each do |ivar_name, value|
+      object.instance_variable_set(ivar_name, value)
+    end
+    object
   end
 end

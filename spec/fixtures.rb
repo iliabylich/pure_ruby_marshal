@@ -1,5 +1,19 @@
 Point = Struct.new(:x, :y)
 
+class Point2
+  attr_reader :x, :y
+
+  def initialize(x, y)
+    @x, @y = x, y
+  end
+
+  def ==(other)
+    other.is_a?(Point2) &&
+      other.x == self.x &&
+      other.y == self.y
+  end
+end
+
 FIXTURES = {
   'nil' => nil,
   'true' => true,
@@ -20,4 +34,5 @@ FIXTURES = {
   'module' => Marshal,
   'struct' => Point.new(3, 7),
   'regexp' => /a_regexp/,
+  'abstract object with ivars' => Point2.new(5, 10),
 }
