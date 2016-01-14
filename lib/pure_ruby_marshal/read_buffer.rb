@@ -28,6 +28,7 @@ class PureRubyMarshal::ReadBuffer
     when '[' then read_array
     when '{' then read_hash
     when 'f' then read_float
+    when 'c' then read_class
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -88,5 +89,22 @@ class PureRubyMarshal::ReadBuffer
 
   def read_float
     read_string.to_f
+  end
+
+  def marshal_const_get(const_name)
+    begin
+      Object.const_get(const_name)
+    rescue NameError
+      raise ArgumentError, "undefined class/module #{const_name}"
+    end
+  end
+
+  def read_class
+    const_name = read_string
+    klass = marshal_const_get(const_name)
+    unless klass.instance_of?(Class)
+      raise ArgumentError, "#{const_name} does not refer to a Class"
+    end
+    klass
   end
 end
