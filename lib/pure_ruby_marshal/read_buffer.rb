@@ -26,6 +26,7 @@ class PureRubyMarshal::ReadBuffer
     when '"' then read_string
     when 'I' then read
     when '[' then read_array
+    when '{' then read_hash
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -77,5 +78,10 @@ class PureRubyMarshal::ReadBuffer
 
   def read_array
     read_integer.times.map { read }
+  end
+
+  def read_hash
+    pairs = read_integer.times.map { [read, read] }
+    Hash[pairs]
   end
 end

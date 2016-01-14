@@ -11,4 +11,6 @@ FIXTURES = {
   'string' => 'a string',
   'empty array' => [],
   'non-empty array' => [1,2,3],
+  'empty hash' => {},
+  'non-empty hash' => { 15 => 5 },
 }
