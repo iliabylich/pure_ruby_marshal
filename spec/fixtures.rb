@@ -15,4 +15,5 @@ FIXTURES = {
   'non-empty hash' => { 15 => 5 },
   'float' => 1.5,
   'class' => Array,
+  'module' => Marshal,
 }
