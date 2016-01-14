@@ -34,6 +34,7 @@ class PureRubyMarshal::ReadBuffer
     when '/' then read_regexp
     when 'o' then read_object
     when 'C' then read_userclass
+    when 'e' then read_extended_object
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -149,5 +150,11 @@ class PureRubyMarshal::ReadBuffer
     klass = marshal_const_get(read)
     data = read
     klass.new(data)
+  end
+
+  def read_extended_object
+    mod = marshal_const_get(read)
+    object = read
+    object.extend(mod)
   end
 end

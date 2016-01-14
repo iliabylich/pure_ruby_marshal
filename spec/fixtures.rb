@@ -17,6 +17,9 @@ end
 class UserArray < Array
 end
 
+module MyModule
+end
+
 FIXTURES = {
   'nil' => nil,
   'true' => true,

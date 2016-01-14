@@ -8,5 +8,11 @@ describe PureRubyMarshal do
         expect(result).to eq(fixture_value)
       end
     end
+
+    it 'loads marshalled extended object' do
+      object = [].extend(MyModule)
+      result = PureRubyMarshal.load(Marshal.dump(object))
+      expect(result).to be_a(MyModule)
+    end
   end
 end
