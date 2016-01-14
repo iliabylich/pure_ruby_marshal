@@ -14,6 +14,9 @@ class Point2
   end
 end
 
+class UserArray < Array
+end
+
 FIXTURES = {
   'nil' => nil,
   'true' => true,
@@ -35,4 +38,5 @@ FIXTURES = {
   'struct' => Point.new(3, 7),
   'regexp' => /a_regexp/,
   'abstract object with ivars' => Point2.new(5, 10),
+  'user class' => UserArray[1,2,3],
 }

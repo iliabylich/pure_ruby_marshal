@@ -33,6 +33,7 @@ class PureRubyMarshal::ReadBuffer
     when 'S' then read_struct
     when '/' then read_regexp
     when 'o' then read_object
+    when 'C' then read_userclass
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -142,5 +143,11 @@ class PureRubyMarshal::ReadBuffer
       object.instance_variable_set(ivar_name, value)
     end
     object
+  end
+
+  def read_userclass
+    klass = marshal_const_get(read)
+    data = read
+    klass.new(data)
   end
 end
