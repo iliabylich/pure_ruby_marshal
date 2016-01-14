@@ -8,4 +8,5 @@ FIXTURES = {
   'big positive number' => 99999,
   'big negative number' => -99999,
   'symbol' => :a_symbol,
+  'string' => 'a string',
 }

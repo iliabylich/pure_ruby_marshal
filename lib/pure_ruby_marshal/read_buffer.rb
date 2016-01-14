@@ -23,6 +23,8 @@ class PureRubyMarshal::ReadBuffer
     when 'F' then false
     when 'i' then read_integer
     when ':' then read_symbol
+    when '"' then read_string
+    when 'I' then read
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -66,5 +68,9 @@ class PureRubyMarshal::ReadBuffer
 
   def read_symbol
     read_integer.times.map { read_char }.join.to_sym
+  end
+
+  def read_string
+    read_integer.times.map { read_char }.join
   end
 end
