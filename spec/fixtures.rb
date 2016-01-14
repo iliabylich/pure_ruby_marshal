@@ -1,3 +1,5 @@
+Point = Struct.new(:x, :y)
+
 FIXTURES = {
   'nil' => nil,
   'true' => true,
@@ -16,4 +18,5 @@ FIXTURES = {
   'float' => 1.5,
   'class' => Array,
   'module' => Marshal,
+  'struct' => Point.new(3, 7),
 }

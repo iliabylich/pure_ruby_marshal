@@ -30,6 +30,7 @@ class PureRubyMarshal::ReadBuffer
     when 'f' then read_float
     when 'c' then read_class
     when 'm' then read_module
+    when 'S' then read_struct
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -116,5 +117,12 @@ class PureRubyMarshal::ReadBuffer
       raise ArgumentError, "#{const_name} does not refer to a Module"
     end
     klass
+  end
+
+  def read_struct
+    klass = marshal_const_get(read)
+    attributes = read_hash
+    values = attributes.values_at(*klass.members)
+    klass.new(*values)
   end
 end
