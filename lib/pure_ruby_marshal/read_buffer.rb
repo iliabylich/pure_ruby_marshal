@@ -5,6 +5,7 @@ class PureRubyMarshal::ReadBuffer
     @data = data.split('')
     @major_version = read_byte
     @minor_version = read_byte
+    @symbols_cache = []
   end
 
   def read_byte
@@ -35,6 +36,7 @@ class PureRubyMarshal::ReadBuffer
     when 'o' then read_object
     when 'C' then read_userclass
     when 'e' then read_extended_object
+    when ';' then read_symbol_link
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -77,7 +79,9 @@ class PureRubyMarshal::ReadBuffer
   end
 
   def read_symbol
-    read_integer.times.map { read_char }.join.to_sym
+    symbol = read_integer.times.map { read_char }.join.to_sym
+    @symbols_cache << symbol
+    symbol
   end
 
   def read_string
@@ -156,5 +160,9 @@ class PureRubyMarshal::ReadBuffer
     mod = marshal_const_get(read)
     object = read
     object.extend(mod)
+  end
+
+  def read_symbol_link
+    @symbols_cache[read_integer]
   end
 end
