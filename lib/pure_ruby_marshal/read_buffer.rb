@@ -6,6 +6,7 @@ class PureRubyMarshal::ReadBuffer
     @major_version = read_byte
     @minor_version = read_byte
     @symbols_cache = []
+    @objects_cache = []
   end
 
   def read_byte
@@ -37,6 +38,7 @@ class PureRubyMarshal::ReadBuffer
     when 'C' then read_userclass
     when 'e' then read_extended_object
     when ';' then read_symbol_link
+    when '@' then read_object_link
     else
       raise NotImplementedError, "Unknown object type #{char}"
     end
@@ -78,27 +80,41 @@ class PureRubyMarshal::ReadBuffer
     end
   end
 
+  def cache_object(&block)
+    object = block.call
+    @objects_cache << object
+    object
+  end
+
   def read_symbol
     symbol = read_integer.times.map { read_char }.join.to_sym
     @symbols_cache << symbol
     symbol
   end
 
-  def read_string
-    read_integer.times.map { read_char }.join
+  def read_string(cache: true)
+    string = read_integer.times.map { read_char }.join
+    @objects_cache << string if cache
+    string
   end
 
   def read_array
-    read_integer.times.map { read }
+    cache_object {
+      read_integer.times.map { read }
+    }
   end
 
-  def read_hash
+  def read_hash(cache: true)
     pairs = read_integer.times.map { [read, read] }
-    Hash[pairs]
+    hash = Hash[pairs]
+    @objects_cache << hash if cache
+    hash
   end
 
   def read_float
-    read_string.to_f
+    cache_object {
+      read_string(cache: false).to_f
+    }
   end
 
   def marshal_const_get(const_name)
@@ -110,59 +126,77 @@ class PureRubyMarshal::ReadBuffer
   end
 
   def read_class
-    const_name = read_string
-    klass = marshal_const_get(const_name)
-    unless klass.instance_of?(Class)
-      raise ArgumentError, "#{const_name} does not refer to a Class"
-    end
-    klass
+    cache_object {
+      const_name = read_string
+      klass = marshal_const_get(const_name)
+      unless klass.instance_of?(Class)
+        raise ArgumentError, "#{const_name} does not refer to a Class"
+      end
+      klass
+    }
   end
 
   def read_module
-    const_name = read_string
-    klass = marshal_const_get(const_name)
-    unless klass.instance_of?(Module)
-      raise ArgumentError, "#{const_name} does not refer to a Module"
-    end
-    klass
+    cache_object {
+      const_name = read_string
+      klass = marshal_const_get(const_name)
+      unless klass.instance_of?(Module)
+        raise ArgumentError, "#{const_name} does not refer to a Module"
+      end
+      klass
+    }
   end
 
   def read_struct
-    klass = marshal_const_get(read)
-    attributes = read_hash
-    values = attributes.values_at(*klass.members)
-    klass.new(*values)
+    cache_object {
+      klass = marshal_const_get(read)
+      attributes = read_hash(cache: false)
+      values = attributes.values_at(*klass.members)
+      klass.new(*values)
+    }
   end
 
   def read_regexp
-    string = read_string
-    kcode = read_byte
-    Regexp.new(string, kcode)
+    cache_object {
+      string = read_string
+      kcode = read_byte
+      Regexp.new(string, kcode)
+    }
   end
 
   def read_object
-    klass = marshal_const_get(read)
-    ivars_data = read_hash
-    object = klass.allocate
-    ivars_data.each do |ivar_name, value|
-      object.instance_variable_set(ivar_name, value)
-    end
-    object
+    cache_object {
+      klass = marshal_const_get(read)
+      ivars_data = read_hash(cache: false)
+      object = klass.allocate
+      ivars_data.each do |ivar_name, value|
+        object.instance_variable_set(ivar_name, value)
+      end
+      object
+    }
   end
 
   def read_userclass
-    klass = marshal_const_get(read)
-    data = read
-    klass.new(data)
+    cache_object {
+      klass = marshal_const_get(read)
+      data = read
+      klass.new(data)
+    }
   end
 
   def read_extended_object
-    mod = marshal_const_get(read)
-    object = read
-    object.extend(mod)
+    cache_object {
+      mod = marshal_const_get(read)
+      object = read
+      object.extend(mod)
+    }
   end
 
   def read_symbol_link
     @symbols_cache[read_integer]
+  end
+
+  def read_object_link
+    @objects_cache[read_integer]
   end
 end

@@ -43,4 +43,5 @@ FIXTURES = {
   'abstract object with ivars' => Point2.new(5, 10),
   'user class' => UserArray[1,2,3],
   'symbol link' => [:symbol1, :symbol1],
+  'object link' => [Marshal, Marshal],
 }
