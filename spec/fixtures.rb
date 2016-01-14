@@ -9,4 +9,6 @@ FIXTURES = {
   'big negative number' => -99999,
   'symbol' => :a_symbol,
   'string' => 'a string',
+  'empty array' => [],
+  'non-empty array' => [1,2,3],
 }
