@@ -48,35 +48,32 @@ class PureRubyMarshal::ReadBuffer
     # c is our first byte
     c = (read_byte ^ 128) - 128
 
-    if c == 0
+    case c
+    when 0
       # 0 means 0
       0
-    elsif c > 0
-      if 4 < c && c < 128
-        # case for small numbers
-        c - 5
-      else
-        # otherwise c next bytes is our number
-        c.
-          times.
-          map { |i| [i, read_byte] }.
-          inject(0) { |result, (i, byte)| result | (byte << (8*i))  }
-      end
-    else
-      if -129 < c && c < -4
-        # case for small numbers
-        c + 5
-      else
-        # (-c) next bytes os our number
-        (-c).
-          times.
-          map { |i| [i, read_byte] }.
-          inject(-1) do |result, (i, byte)|
-            a = ~(0xff << (8*i))
-            b = byte << (8*i)
-            (result & a) | b
-          end
-      end
+    when (4..127)
+      # case for small positive numbers
+      c - 5
+    when (1..3)
+      # c next bytes is our big positive number
+      c.
+        times.
+        map { |i| [i, read_byte] }.
+        inject(0) { |result, (i, byte)| result | (byte << (8*i))  }
+    when (-128..-6)
+      # case for small negative numbers
+      c + 5
+    when (-5..-1)
+      # (-c) next bytes is our number
+      (-c).
+        times.
+        map { |i| [i, read_byte] }.
+        inject(-1) do |result, (i, byte)|
+          a = ~(0xff << (8*i))
+          b = byte << (8*i)
+          (result & a) | b
+        end
     end
   end
 
@@ -118,11 +115,9 @@ class PureRubyMarshal::ReadBuffer
   end
 
   def marshal_const_get(const_name)
-    begin
-      Object.const_get(const_name)
-    rescue NameError
-      raise ArgumentError, "undefined class/module #{const_name}"
-    end
+    Object.const_get(const_name)
+  rescue NameError
+    raise ArgumentError, "undefined class/module #{const_name}"
   end
 
   def read_class

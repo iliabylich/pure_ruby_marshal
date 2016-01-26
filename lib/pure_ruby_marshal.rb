@@ -4,7 +4,7 @@ module PureRubyMarshal
   extend self
 
   autoload :ReadBuffer,  'pure_ruby_marshal/read_buffer'
-  autoload :WriteBuffer, 'pure_ruby_marshal/read_buffer'
+  autoload :WriteBuffer, 'pure_ruby_marshal/write_buffer'
   MAJOR_VERSION = 4
   MINOR_VERSION = 8
 
